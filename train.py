@@ -14,10 +14,7 @@ from utils import *
 
 
 def train_net(net, epochs=100, batch_size=2, lr=0.02, val_percent=0.05,
-              cp=True, gpu=False):
-    dir_img = '/home/wdh/DataSets/hand-segmentation/GTEA_gaze_part/Resize/Images/'
-    dir_mask = '/home/wdh/DataSets/hand-segmentation/GTEA_gaze_part/Resize/Masks_1/'
-    dir_checkpoint = 'checkpoints/'
+              cp=True, gpu=False, dir_img='', dir_mask='', dir_checkpoint=None):
 
     ids = get_ids(dir_img)
     ids = split_ids(ids)
@@ -75,10 +72,10 @@ def train_net(net, epochs=100, batch_size=2, lr=0.02, val_percent=0.05,
             y_flat = y.view(-1)
 
             loss = criterion(probs_flat, y_flat.float())
-            epoch_loss += loss.data[0]
+            epoch_loss += loss.item()
 
             print('{0:.4f} --- loss: {1:.6f}'.format(i * batch_size / N_train,
-                                                     loss.data[0]))
+                                                     loss.item()))
 
             optimizer.zero_grad()
 
@@ -107,7 +104,16 @@ if __name__ == '__main__':
                       default=False, help='use cuda')
     parser.add_option('-c', '--load', dest='load',
                       default=False, help='load file model')
-
+    parser.add_option('-i','--dir-img',dest='dir_img',
+                      default='',
+                      help='directory of image folder')
+    parser.add_option('-m','--dir-mask',dest='dir_mask',
+                      default='',
+                      help='directory of mask folder')
+    parser.add_option('-d','--dir-checkpoint',dest='dir_checkpoint',
+                      default='',
+                      help='directory of checkpoint')
+    
     (options, args) = parser.parse_args()
 
     net = UNet(3, 1)
@@ -121,8 +127,13 @@ if __name__ == '__main__':
         cudnn.benchmark = True
 
     try:
-        train_net(net, options.epochs, options.batchsize, options.lr,
-                  gpu=options.gpu)
+        train_net(net, options.epochs, 
+                  options.batchsize, 
+                  options.lr,
+                  gpu=options.gpu,
+                  dir_img=options.dir_img,
+                  dir_mask=options.dir_mask,
+                  dir_checkpoint=options.dir_checkpoint)
     except KeyboardInterrupt:
         torch.save(net.state_dict(), 'INTERRUPTED.pth')
         print('Saved interrupt')
