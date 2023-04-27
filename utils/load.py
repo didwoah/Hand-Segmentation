@@ -25,7 +25,7 @@ def to_cropped_imgs(ids, dir, suffix, isMask=False):
     """From a list of tuples, returns the correct cropped img"""
     for id, pos in ids:
         if isMask:
-            im = resize_and_crop(Image.open(dir + id + suffix).convert('L'))
+            im = resize_and_crop(Image.open(dir + id + suffix).convert('L').point(lambda x: 0 if x < 128 else 255, '1'))
         else:
             im = resize_and_crop(Image.open(dir + id + suffix))
         yield get_square(im, pos)
@@ -47,5 +47,5 @@ def get_imgs_and_masks(ids, dir_img, dir_mask):
 
 def get_full_img_and_mask(id, dir_img, dir_mask):
     im = Image.open(dir_img + id + '.jpg')
-    mask = Image.open(dir_mask + id + '.jpg').convert('L')
+    mask = Image.open(dir_mask + id + '.jpg').convert('L').point(lambda x: 0 if x < 128 else 255, '1')
     return np.array(im), np.array(mask)
