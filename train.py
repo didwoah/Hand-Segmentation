@@ -86,8 +86,9 @@ def train_net(net, epochs=100, batch_size=2, lr=0.02, val_percent=0.05,
         print('Epoch finished ! Loss: {}'.format(epoch_loss / i))
 
         if cp:
-            torch.save(net.state_dict(),
-                       dir_checkpoint + 'CP{}.pth'.format(epoch + 1))
+            if epoch+1==epochs:
+                torch.save(net.state_dict(),
+                        dir_checkpoint + 'CP{}.pth'.format(epoch + 1))
 
             print('Checkpoint {} saved !'.format(epoch + 1))
 
